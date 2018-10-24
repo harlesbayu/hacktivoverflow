@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const app = express();
 const routes = require("./routes")
 require("dotenv").config();
+const rememberUser = require("./helpers/rememberUser")
 var kue = require('kue')
   , queue = kue.createQueue();
 
@@ -26,7 +27,7 @@ kue.app.listen(3001)
 
 app.listen(port, () => {
   console.log('Listening on port ', port)
-  // checkContent()
+  rememberUser()
 })
 
 
