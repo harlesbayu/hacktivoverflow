@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
-const sgMail = require('@sendgrid/mail');
-var kue = require('kue')
-  , queue = kue.createQueue();
+// const sgMail = require('@sendgrid/mail');
+// var kue = require('kue')
+//   , queue = kue.createQueue();
 
 const userSchema = new Schema({
   name:  {
@@ -65,31 +65,31 @@ userSchema.post("validate", doc => {
   );
 });
 
-userSchema.post("save", (doc, next) => {
+// userSchema.post("save", (doc, next) => {
 
-  var job = queue.create('email', {
-      to: `${doc.email}`, 
-      from: 'anggarabayuharles@gmail.com', 
-      subject: 'welcome in harlesoverflow',
-      text: 'Thanks for registration harlesoverflow',
-  }).save( function(err){
-    // if( !err ) console.log( job.id );
-  });
+//   var job = queue.create('email', {
+//       to: `${doc.email}`, 
+//       from: 'anggarabayuharles@gmail.com', 
+//       subject: 'welcome in harlesoverflow',
+//       text: 'Thanks for registration harlesoverflow',
+//   }).save( function(err){
+//     // if( !err ) console.log( job.id );
+//   });
 
-  queue.process('email', function(job, done){
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    const msg = {
-      to: `${job.data.to}`,
-      from: `${job.data.from}`,
-      subject: `${job.data.subject}`,
-      text: `${job.data.text}`,
-      // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-    };
-    sgMail.send(msg);
-    done()
-    next()
-  });
-});
+//   queue.process('email', function(job, done){
+//     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+//     const msg = {
+//       to: `${job.data.to}`,
+//       from: `${job.data.from}`,
+//       subject: `${job.data.subject}`,
+//       text: `${job.data.text}`,
+//       // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+//     };
+//     sgMail.send(msg);
+//     done()
+//     next()
+//   });
+// });
 
 
 
