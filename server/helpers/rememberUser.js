@@ -1,67 +1,43 @@
 const CronJob = require('cron').CronJob;
 const User = require("../models/user")
+const Question = require("../models/questions")
 const sgMail = require('@sendgrid/mail');
+const nodemailer = require('nodemailer');
 var kue = require('kue')
   , queue = kue.createQueue();
 
 module.exports = function checkContent () {
-  new CronJob('* 0 10 * * 5', function() {
-    User.find()
-      .then((users) => {
+  new CronJob('* * * * * *',() =>{
 
-        // console.log(users)
-        for(let i = 0; i < users.length; i++) {
-
-          var job = queue.create('email', {
-            to: `${users[i].email}`, 
-            from: 'anggarabayuharles@gmail.com', 
-            subject: 'Ingat waktu ingat ibadah',
-            text: 'Jangan lupa shalat jumat',
-          }).save( function(err){
-            // if( !err ) console.log( job.id );
-          });
+    queue.process(`greetinguser${new Date()}`, (job, done) => {
+     
+      Question.find({ postBy : job.data.userId })
+      .populate("postBy")
+      .then((question) => {
+     
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        const msg = {
+          to: `${job.data.useremail}`,
+          from: `harlesbayuanggara@gmail.com`,
+          subject: `Hello Member`,
+          html: `
+          <p>Terimakasih atas kontribusinya selama 3 bulan di harlesoverflow</p>
+          <strong>Jumlah quesion anda saat ini ${question.length}</strong>
+          <br/>>
+          Terus berkontribusi pada situs kami
+          `
+          ,
+        };
+        sgMail.send(msg);
         
-          queue.process('email', function(job, done){
-            sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-            const msg = {
-              to: `${job.data.to}`,
-              from: `${job.data.from}`,
-              subject: `${job.data.subject}`,
-              text: `${job.data.text}`,
-              // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-            };
-            sgMail.send(msg);
-            done()
-          });
-  
-        }
-
-        // console.log(questions)
-        // console.log(questions.length)
-        // for(let i = 0; i < questions.length; i++) {
-          // console.log(questions[i].downvote.length)
-          // if(questions[i].downvote.length == 3){
-
-            // Question.findByIdAndDelete(questions[i]._id)
-            // .then(question => {
-            //   Answer.deleteMany({ _id: { $in: question.answers } })
-            //     .then(result => {})
-            //     .catch(err => {});
-
-            //   res.status(201).json({
-            //     question,
-            //     message: `delete ${question.title} success`
-            //   });
-            // })
-            // .catch(err => {
-            //   res.status(404).json({ err });
-            // });
-
-      //     }
-      //   }
-      })
-      .catch((err) => {
+        done()
+        
+      }).catch((err) => {
         console.log(err)
-      })
+      });
+      
+      
+    });
+
   }, null, true, 'Asia/Jakarta');
 }

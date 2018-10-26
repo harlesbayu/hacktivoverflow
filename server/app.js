@@ -4,13 +4,13 @@ const mongoose = require("mongoose");
 const app = express();
 const routes = require("./routes")
 require("dotenv").config();
-// const rememberUser = require("./helpers/rememberUser")
-// var kue = require('kue')
-//   , queue = kue.createQueue();
+const rememberUser = require("./helpers/rememberUser")
+var kue = require('kue')
+  , queue = kue.createQueue();
 
-const port = process.env.PORT || 3000;
+const port = 3000;
 
-mongoose.connect(process.env.MONGO_MLAB, { useNewUrlParser : false });
+mongoose.connect(process.env.MONGO_LOCAL, { useNewUrlParser : false });
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
@@ -27,7 +27,7 @@ kue.app.listen(3001)
 
 app.listen(port, () => {
   console.log('Listening on port ', port)
-  // rememberUser()
+  rememberUser()
 })
 
 
